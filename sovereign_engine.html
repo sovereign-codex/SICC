@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sovereign Engine — Year 1 Launcher</title>
+<style>
+  :root{
+    --bg:#0b0d10;
+    --card:#13161b;
+    --ink:#e6e9ef;
+    --muted:#9aa3af;
+    --accent:#7dd3fc;
+    --accent2:#a78bfa;
+    --ok:#34d399;
+    --warn:#f59e0b;
+    --danger:#ef4444;
+    --line:#21262d;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background: radial-gradient(1200px 700px at 20% -10%, #16202e22, transparent),
+                radial-gradient(1000px 800px at 120% 10%, #2b153a22, transparent),
+                var(--bg);
+    color:var(--ink);
+    font: 15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  }
+  header{
+    position:sticky; top:0; z-index:5;
+    backdrop-filter:saturate(1.2) blur(6px);
+    background:#0b0d10cc;
+    border-bottom:1px solid var(--line);
+  }
+  .bar{
+    max-width:1200px; margin:0 auto; padding:12px 16px;
+    display:flex; gap:12px; align-items:center; justify-content:space-between;
+  }
+  .brand{display:flex; gap:10px; align-items:center; font-weight:700; letter-spacing:.3px}
+  .brand .logo{
+    width:28px; height:28px; border-radius:50%;
+    background: conic-gradient(from 0deg, var(--accent), var(--accent2), var(--accent));
+    box-shadow: 0 0 0 2px #ffffff10 inset, 0 0 18px #7dd3fc55;
+  }
+  nav{display:flex; gap:8px; flex-wrap:wrap}
+  nav button{
+    background:#0f1216; color:var(--ink);
+    border:1px solid var(--line);
+    padding:8px 10px; border-radius:8px; cursor:pointer;
+  }
+  nav button.active{border-color:#2a3340; background:#151a21}
+  main{max-width:1200px; margin: 20px auto; padding:0 16px 60px}
+  .grid{display:grid; grid-template-columns:1.1fr .9fr; gap:16px}
+  @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
+  .card{
+    background: linear-gradient(180deg, #11151b, #0f1318);
+    border:1px solid var(--line);
+    border-radius:14px; padding:16px; position:relative; overflow:hidden;
+    box-shadow: 0 10px 30px #00000040;
+  }
+  .card h2{margin:.1rem 0 10px 0; font-size:18px}
+  .card h3{margin:16px 0 8px; font-size:16px; color:var(--muted)}
+  label{display:block; font-size:12px; color:var(--muted); margin:10px 0 6px}
+  input[type=text], input[type=number], textarea, select{
+    width:100%; background:#0c0f13; color:var(--ink);
+    border:1px solid #20242c; border-radius:10px; padding:10px 12px;
+    outline:none;
+  }
+  textarea{min-height:82px; resize:vertical}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .row > *{flex:1}
+  .pill{
+    display:inline-flex; gap:8px; align-items:center;
+    padding:6px 10px; border-radius:999px; font-size:12px;
+    border:1px dashed #2a3340; color:var(--muted);
+    margin: 6px 6px 0 0;
+  }
+  .btn{
+    background:linear-gradient(180deg,#18212b,#121820);
+    border:1px solid #263041;
+    color:var(--ink);
+    padding:10px 12px; border-radius:10px;
+    cursor:pointer; font-weight:600;
+  }
+  .btn.primary{
+    background:linear-gradient(180deg,#0e4a63,#0b3446);
+    border-color:#156084; box-shadow:0 0 24px #7dd3fc33 inset, 0 0 18px #7dd3fc22;
+  }
+  .btn.ghost{background:#0e1217; border:1px solid #232a33}
+  .btn.inline{padding:6px 10px; font-size:12px; border-radius:8px}
+  .muted{color:var(--muted)}
+  .list{display:grid; gap:10px; margin-top:8px; max-height:420px; overflow:auto; padding-right:4px}
+  .task{
+    border:1px solid #232a33; border-radius:10px; padding:10px; background:#0e1217;
+    display:grid; grid-template-columns: 28px 1fr auto; gap:10px; align-items:center;
+  }
+  .task .idx{width:24px; height:24px; border-radius:6px; display:grid; place-items:center;
+    background:#0a0e13; border:1px solid #1f2530; font-size:12px; color:var(--muted);
+  }
+  .task .title{font-weight:600}
+  .task .meta{font-size:12px; color:var(--muted)}
+  .task .actions{display:flex; gap:8px}
+  .inline-fields{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+  .tags{display:flex; gap:6px; flex-wrap:wrap}
+  .tag{
+    font-size:11px; padding:3px 8px; background:#0b1016; border:1px solid #212733; border-radius:999px;
+    color:var(--muted)
+  }
+  .svgwrap{width:100%; height:280px; background:#0b0f14; border:1px solid #1f2530; border-radius:12px; overflow:hidden}
+  .footer{
+    margin-top:18px; display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end
+  }
+  .kpi{display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
+  @media (max-width:700px){ .kpi{grid-template-columns:repeat(2,1fr)} }
+  .kpi .box{background:#0e141a; border:1px solid #1f2530; padding:12px; border-radius:12px}
+  .kpi .box b{display:block; font-size:20px}
+  .hl{color:var(--accent)}
+  .divider{height:1px; background:#1f2530; margin:12px 0}
+  details summary{cursor:pointer}
+  .notice{border-left:3px solid var(--accent); padding:8px 12px; background:#0e141a; border:1px solid #1f2530; border-radius:8px}
+  .small{font-size:12px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <div class="brand"><div class="logo" aria-hidden="true"></div><div>Sovereign Engine</div></div>
+      <nav>
+        <button class="active" data-tab="tab-seed">Seed</button>
+        <button data-tab="tab-year">Year 1</button>
+        <button data-tab="tab-ledger">Ledger</button>
+        <button data-tab="tab-legacy">Legacy</button>
+        <button data-tab="tab-help">Help</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="tab-seed" class="tab card">
+      <h2>Mission Seed</h2>
+      <p class="muted">Set your intent. The engine will compile a 365‑task launch sequence, weekly anchors, quarterly milestones, and a Beyond Plan.</p>
+
+      <div class="row">
+        <div class="card">
+          <h3>Intent</h3>
+          <label>Mission Title</label>
+          <input type="text" id="title" placeholder="e.g., Node 01 — Tyme Core"/>
+          <label>Goals (comma‑separated)</label>
+          <input type="text" id="goals" placeholder="Increase condensation 2x, Reduce input power 30%, Open-source the scroll"/>
+          <label>Constraints</label>
+          <input type="text" id="constraints" placeholder="Off‑the‑shelf parts, EEE compliance, CC‑BY‑SA"/>
+          <label>Ethics</label>
+          <input type="text" id="ethics" placeholder="Garden Flame Codex, Living Kodex for EAI"/>
+          <label>Skill Focus (comma‑separated)</label>
+          <input type="text" id="skills" placeholder="plasma, CAD, CFD, documentation, outreach"/>
+          <div class="divider"></div>
+          <div class="inline-fields">
+            <button class="btn primary" id="compile">Compile Year 1</button>
+            <button class="btn ghost" id="demoFill">Demo Fill</button>
+            <span class="muted small" id="compileStatus" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Configuration</h3>
+          <div class="row">
+            <div>
+              <label>Start Date</label>
+              <input type="date" id="startDate"/>
+            </div>
+            <div>
+              <label>Weeks per Quarter</label>
+              <input type="number" id="weeksPerQ" value="13" min="8" max="16"/>
+            </div>
+          </div>
+          <label>Weekly Anchors</label>
+          <div class="tags" id="anchorList"></div>
+          <div class="divider"></div>
+          <h3>Quick Export / Import</h3>
+          <div class="inline-fields">
+            <button class="btn inline" id="exportJSON">Export JSON</button>
+            <label class="btn inline" for="importFile" style="cursor:pointer">Import JSON</label>
+            <input id="importFile" type="file" accept="application/json" class="hidden"/>
+            <button class="btn inline" id="saveLocal">Save to Device</button>
+            <button class="btn inline" id="loadLocal">Load from Device</button>
+            <button class="btn inline" id="resetAll">Reset</button>
+          </div>
+          <p class="small muted">Local saves use your browser storage. Export a Time Capsule JSON for sharing or backup.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-year" class="tab card hidden">
+      <h2>Year 1 Sequence</h2>
+      <div class="kpi">
+        <div class="box"><span class="muted small">Tasks</span><b id="kpiTasks">0</b></div>
+        <div class="box"><span class="muted small">Milestones</span><b id="kpiMilestones">0</b></div>
+        <div class="box"><span class="muted small">Coherence Score</span><b id="kpiCoherence">—</b></div>
+        <div class="box"><span class="muted small">Progress</span><b id="kpiProgress">0%</b></div>
+      </div>
+      <h3>Quarter Milestone Graph</h3>
+      <div class="svgwrap"><svg id="milestoneSVG" width="100%" height="100%" role="img" aria-label="Milestone dependency graph"></svg></div>
+
+      <div class="divider"></div>
+      <div class="inline-fields">
+        <input type="text" id="filterText" placeholder="Filter tasks (text or #tag)…">
+        <select id="filterRange">
+          <option value="all">All Days</option>
+          <option value="week">Current Week</option>
+          <option value="month">Current Month</option>
+          <option value="quarter">Current Quarter</option>
+        </select>
+        <button class="btn inline" id="sortAsc">Sort Asc</button>
+        <button class="btn inline" id="sortDesc">Sort Desc</button>
+        <button class="btn inline" id="markAll">Mark Visible Complete</button>
+        <button class="btn inline" id="beyondPlan">Generate Beyond Plan</button>
+      </div>
+      <div id="taskList" class="list" aria-live="polite"></div>
+      <div class="footer">
+        <button class="btn" id="exportCapsule">Export Time Capsule</button>
+      </div>
+    </section>
+
+    <section id="tab-ledger" class="tab card hidden">
+      <h2>X–Change Ledger (Prototype)</h2>
+      <p class="muted small">Track coherence‑boosting contributions. This is a local‑only prototype; connect it to a real ledger later.</p>
+      <div class="row">
+        <div class="card">
+          <label>Entry Title</label>
+          <input type="text" id="ledTitle" placeholder="e.g., Optimized condensation geometry">
+          <label>Impact (1–5)</label>
+          <input type="number" id="ledImpact" min="1" max="5" value="3">
+          <label>Difficulty (1–5)</label>
+          <input type="number" id="ledDiff" min="1" max="5" value="3">
+          <label>Notes</label>
+          <textarea id="ledNotes" placeholder="Summary, links, or provenance…"></textarea>
+          <div class="inline-fields">
+            <button class="btn primary" id="addLedger">Add Entry</button>
+            <button class="btn ghost" id="clearLedger">Clear Ledger</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Entries</h3>
+          <div id="ledgerList" class="list" style="max-height:360px"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-legacy" class="tab card hidden">
+      <h2>Legacy & Training Ground</h2>
+      <div class="notice small">
+        Package your mission, tasks, milestones, and ledger into a portable <b>Time Capsule</b> for future generations.
+      </div>
+      <h3>Harmonic Academy (Practice Drills)</h3>
+      <details open>
+        <summary>Daily Calibration (5–10 min)</summary>
+        <ul class="small">
+          <li>Breath coherence (1 min box breathing)</li>
+          <li>Intent recall (read mission aloud)</li>
+          <li>Micro‑commit (choose today’s 1 action)</li>
+        </ul>
+      </details>
+      <details>
+        <summary>Weekly Anchors</summary>
+        <ul class="small">
+          <li>Mon — Align: plan & prioritize</li>
+          <li>Tue — Build: deep work sprint</li>
+          <li>Wed — Share: publish or demo</li>
+          <li>Thu — Collaborate: sync with others</li>
+          <li>Fri — Integrate: merge & document</li>
+          <li>Sat — Restore: nature & renewal</li>
+          <li>Sun — Reflect: review & beyond seed</li>
+        </ul>
+      </details>
+      <div class="footer">
+        <button class="btn" id="exportLegacy">Export Legacy Capsule</button>
+        <button class="btn ghost" id="importLegacyBtn">Import Capsule</button>
+        <input id="importLegacy" type="file" accept="application/json" class="hidden"/>
+      </div>
+    </section>
+
+    <section id="tab-help" class="tab card hidden">
+      <h2>Help & Deployment</h2>
+      <p class="small">This file is self‑contained and works offline. To publish on a free domain:</p>
+      <ol class="small">
+        <li><b>GitHub Pages</b>: create a repo, add this file as <code>index.html</code>, enable Pages in Settings → Pages (Branch: main, /root). Your site will appear at <i>username.github.io/reponame</i>.</li>
+        <li><b>Netlify</b>: drag‑and‑drop this file into <i>app.netlify.com</i> → Deploys. It generates a free subdomain; set a custom name under Site settings → Domain.</li>
+        <li><b>Vercel</b>: create a new project from a repo with this <code>index.html</code>. Vercel auto‑detects static site and deploys to a free subdomain.</li>
+      </ol>
+      <p class="small muted">Everything you do here stays in your browser unless you export JSON. No external libraries are used.</p>
+    </section>
+  </main>
+
+<script>
+/* ----------------------- State ----------------------- */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+const defaultAnchors = [
+  {day:1,  label:'Mon — Align', tag:'#align'},
+  {day:2,  label:'Tue — Build', tag:'#build'},
+  {day:3,  label:'Wed — Share', tag:'#share'},
+  {day:4,  label:'Thu — Collaborate', tag:'#collab'},
+  {day:5,  label:'Fri — Integrate', tag:'#integrate'},
+  {day:6,  label:'Sat — Restore', tag:'#restore'},
+  {day:7,  label:'Sun — Reflect', tag:'#reflect'}
+];
+
+let engine = {
+  seed: {
+    title: '',
+    goals: [],
+    constraints: [],
+    ethics: [],
+    skills: []
+  },
+  config: {
+    startDate: null,
+    weeksPerQ: 13,
+    anchors: defaultAnchors
+  },
+  year: {
+    milestones: [], // per quarter
+    tasks: [],      // 365
+    progress: {}    // id->bool
+  },
+  ledger: []
+};
+
+/* ----------------------- Tabs ----------------------- */
+$$('nav button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    $$('nav button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    $$('.tab').forEach(t=>t.classList.add('hidden'));
+    const tab = '#'+btn.dataset.tab;
+    $(tab).classList.remove('hidden');
+  });
+});
+
+/* ----------------------- Seed UI ----------------------- */
+function renderAnchors(){
+  const wrap = $('#anchorList'); wrap.innerHTML='';
+  engine.config.anchors.forEach(a=>{
+    const el = document.createElement('span');
+    el.className='pill';
+    el.textContent = a.label + ' ' + a.tag;
+    wrap.appendChild(el);
+  });
+}
+renderAnchors();
+
+$('#demoFill').addEventListener('click', ()=>{
+  $('#title').value = "Node 01 — Tyme Core";
+  $('#goals').value = "Increase condensation 2x, Reduce input power 30%, Open-source the scroll";
+  $('#constraints').value = "Off-the-shelf parts, EEE compliance, CC-BY-SA";
+  $('#ethics').value = "Garden Flame Codex, Living Kodex for EAI";
+  $('#skills').value = "plasma, CAD, CFD, documentation, outreach";
+  if(!$('#startDate').value){
+    const today = new Date().toISOString().slice(0,10);
+    $('#startDate').value = today;
+  }
+});
+
+/* ------------------ Compile Year 1 -------------------- */
+function parseCSV(s){return s.split(',').map(x=>x.trim()).filter(Boolean);}
+
+function rng(seed){
+  // simple LCG for deterministic generation across sessions
+  let s = seed % 2147483647; if (s <= 0) s += 2147483646;
+  return ()=> (s = s * 16807 % 2147483647) / 2147483647;
+}
+
+function compileYear(){
+  const title = $('#title').value.trim();
+  const goals = parseCSV($('#goals').value);
+  const constraints = parseCSV($('#constraints').value);
+  const ethics = parseCSV($('#ethics').value);
+  const skills = parseCSV($('#skills').value);
+  const start = $('#startDate').value ? new Date($('#startDate').value) : new Date();
+  const weeksPerQ = parseInt($('#weeksPerQ').value||'13',10);
+
+  engine.seed = {title, goals, constraints, ethics, skills};
+  engine.config.startDate = start.toISOString();
+  engine.config.weeksPerQ = weeksPerQ;
+
+  // Milestones: one per quarter + kickoff/close
+  const ms = [];
+  const quarters = ['Q1','Q2','Q3','Q4'];
+  const primaryGoals = goals.slice(0,3);
+  quarters.forEach((q, i)=>{
+    ms.push({
+      id:'MS'+(i+1),
+      title: q+' Milestone',
+      desc: (primaryGoals[i%primaryGoals.length]||'Progress review'),
+      dependsOn: i===0?[]:['MS'+i]
+    });
+  });
+  ms.unshift({id:'MS0', title:'Kickoff', desc:title||'Mission Initiation', dependsOn:[]});
+  ms.push({id:'MS5', title:'Integration & Release', desc:'Assemble scrolls, schematics, deployment', dependsOn:['MS4']});
+  engine.year.milestones = ms;
+
+  // Tasks generation: 365 based on anchors, skills, goals
+  const startDay = new Date(start);
+  const rand = rng(start.getFullYear()+start.getMonth()+start.getDate()+title.length+goals.join('').length);
+  const tasks = [];
+  const tagPool = ['#align','#build','#share','#collab','#integrate','#restore','#reflect']
+    .concat(skills.map(s=>'#'+s.replace(/\s+/g,'')));
+  for(let i=0;i<365;i++){
+    const d = new Date(startDay); d.setDate(d.getDate()+i);
+    const dow = d.getDay(); // 0 Sun..6 Sat
+    const anchor = defaultAnchors[(dow+6)%7]; // make 0=Mon
+    const g = goals[Math.floor(rand()*goals.length)] || 'Coherence upkeep';
+    const s = skills[Math.floor(rand()*Math.max(1,skills.length))] || 'general';
+    const titleT = `${anchor.label.split(' — ')[1]}: ${g}`;
+    const id = 'D'+(i+1);
+    const tags = [anchor.tag, '#'+s.replace(/\s+/g,'')];
+    tasks.push({
+      id, dayIndex:i+1, date:d.toISOString().slice(0,10),
+      title:titleT, tags, notes:`Focus: ${s}. Constraint: ${(constraints[0]||'mindful usage')}.`,
+      milestoneRef: milestoneRefForDay(i, weeksPerQ),
+      done:false
+    });
+  }
+  engine.year.tasks = tasks;
+  engine.year.progress = {};
+
+  // KPIs + render
+  $('#compileStatus').textContent = 'Compiled ✔';
+  updateKPIs();
+  drawMilestones();
+  renderTaskList();
+  saveLocal();
+}
+
+function milestoneRefForDay(i, weeksPerQ){
+  const day = i+1;
+  const quarter = Math.ceil((day/7)/weeksPerQ);
+  return 'MS'+Math.min(Math.max(quarter,1),4);
+}
+
+/* ----------------------- Render ----------------------- */
+function updateKPIs(){
+  const t = engine.year.tasks.length;
+  const done = engine.year.tasks.filter(x=>x.done).length;
+  const ms = engine.year.milestones.length;
+  // simple coherence proxy = goal coverage / duplication penalty
+  const goalCoverage = new Set(engine.seed.goals.map(g=>g.toLowerCase())).size || 1;
+  const tagSpread = new Set(engine.year.tasks.flatMap(x=>x.tags)).size || 1;
+  const coherence = Math.round( ( (goalCoverage+tagSpread)/10 )*100 );
+  $('#kpiTasks').textContent = t;
+  $('#kpiMilestones').textContent = ms;
+  $('#kpiCoherence').textContent = coherence + '%';
+  $('#kpiProgress').textContent = t? Math.round(done/t*100)+'%':'0%';
+}
+
+function drawMilestones(){
+  const svg = $('#milestoneSVG');
+  svg.innerHTML='';
+  const ms = engine.year.milestones;
+  if(!ms.length){ return; }
+  const w = svg.clientWidth||svg.parentElement.clientWidth;
+  const h = svg.clientHeight||280;
+  const cx = w/2, cy = h/2, r = Math.min(w,h)/2 - 30;
+
+  // nodes on a circle
+  ms.forEach((m, idx)=>{
+    const angle = (idx/ms.length)*Math.PI*2 - Math.PI/2;
+    m.x = cx + r*Math.cos(angle);
+    m.y = cy + r*Math.sin(angle);
+  });
+
+  // edges
+  ms.forEach(m=>{
+    (m.dependsOn||[]).forEach(dep=>{
+      const src = ms.find(x=>x.id===dep); if(!src) return;
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', src.x); line.setAttribute('y1', src.y);
+      line.setAttribute('x2', m.x);   line.setAttribute('y2', m.y);
+      line.setAttribute('stroke', '#263041'); line.setAttribute('stroke-width','2');
+      svg.appendChild(line);
+    });
+  });
+
+  // nodes
+  ms.forEach(m=>{
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx', m.x); c.setAttribute('cy', m.y); c.setAttribute('r', 12);
+    c.setAttribute('fill', '#0b1016'); c.setAttribute('stroke','#3a4b63'); c.setAttribute('stroke-width','2');
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x', m.x+16); t.setAttribute('y', m.y+4);
+    t.setAttribute('fill', '#cbd5e1'); t.setAttribute('font-size','12');
+    t.textContent = m.title;
+    g.appendChild(c); g.appendChild(t);
+    svg.appendChild(g);
+  });
+}
+
+function renderTaskList(){
+  const list = $('#taskList'); list.innerHTML='';
+  const fText = ($('#filterText').value||'').toLowerCase();
+  const range = $('#filterRange').value;
+  const sortAsc = renderTaskList.sortDir==='asc';
+
+  let items = engine.year.tasks.slice();
+  // filter text/tags
+  if(fText){
+    items = items.filter(x => x.title.toLowerCase().includes(fText) ||
+                               x.tags.join(' ').toLowerCase().includes(fText));
+  }
+  // filter by range
+  const today = new Date();
+  items = items.filter(x=>{
+    const d = new Date(x.date);
+    if(range==='all') return true;
+    if(range==='week'){
+      const diff = Math.abs((today - d)/(1000*60*60*24));
+      return diff <= 7;
+    }
+    if(range==='month'){
+      return d.getMonth()===today.getMonth() && d.getFullYear()===today.getFullYear();
+    }
+    if(range==='quarter'){
+      const q = Math.floor(today.getMonth()/3);
+      return Math.floor(d.getMonth()/3)===q && d.getFullYear()===today.getFullYear();
+    }
+    return true;
+  });
+
+  // sort
+  items.sort((a,b)=> sortAsc ? (a.date.localeCompare(b.date)) : (b.date.localeCompare(a.date)) );
+
+  items.forEach(it=>{
+    const el = document.createElement('div'); el.className='task';
+    const chk = document.createElement('input'); chk.type='checkbox'; chk.checked=!!it.done;
+    chk.addEventListener('change', ()=>{ it.done = chk.checked; updateKPIs(); saveLocal(); });
+    const idx = document.createElement('div'); idx.className='idx'; idx.textContent = it.dayIndex;
+    const main = document.createElement('div');
+    const title = document.createElement('div'); title.className='title'; title.textContent = it.title;
+    const meta = document.createElement('div'); meta.className='meta';
+    meta.textContent = `${it.date}  •  ${it.tags.join(' ')}  •  → ${it.milestoneRef}`;
+    const notes = document.createElement('div'); notes.className='small muted'; notes.textContent = it.notes;
+    main.appendChild(title); main.appendChild(meta); main.appendChild(notes);
+
+    const actions = document.createElement('div'); actions.className='actions';
+    const btnUp = document.createElement('button'); btnUp.className='btn inline'; btnUp.textContent='Nudge';
+    btnUp.title='Refine this task text'; btnUp.addEventListener('click', ()=>{
+      it.title = refineTitle(it.title);
+      renderTaskList(); saveLocal();
+    });
+    const btnTag = document.createElement('button'); btnTag.className='btn inline'; btnTag.textContent='+Tag';
+    btnTag.addEventListener('click', ()=>{
+      const t = prompt('Add tag (e.g., #CFD):','#');
+      if(t){ it.tags.push(t); renderTaskList(); saveLocal(); }
+    });
+    actions.appendChild(btnUp); actions.appendChild(btnTag);
+
+    el.prepend(chk); el.appendChild(idx); el.appendChild(main); el.appendChild(actions);
+    list.appendChild(el);
+  });
+}
+
+renderTaskList.sortDir='asc';
+$('#sortAsc').addEventListener('click', ()=>{ renderTaskList.sortDir='asc'; renderTaskList(); });
+$('#sortDesc').addEventListener('click', ()=>{ renderTaskList.sortDir='desc'; renderTaskList(); });
+
+$('#filterText').addEventListener('input', renderTaskList);
+$('#filterRange').addEventListener('change', renderTaskList);
+$('#markAll').addEventListener('click', ()=>{
+  const fText = ($('#filterText').value||'').toLowerCase();
+  const range = $('#filterRange').value;
+  engine.year.tasks.forEach(x=>{
+    const matchText = !fText || x.title.toLowerCase().includes(fText) || x.tags.join(' ').toLowerCase().includes(fText);
+    const d = new Date(x.date), t=new Date();
+    let matchRange = true;
+    if(range==='week') matchRange = Math.abs((t-d)/(1000*60*60*24))<=7;
+    if(range==='month') matchRange = d.getMonth()===t.getMonth() && d.getFullYear()===t.getFullYear();
+    if(range==='quarter') matchRange = Math.floor(d.getMonth()/3)===Math.floor(t.getMonth()/3) && d.getFullYear()===t.getFullYear();
+    if(matchText && matchRange) x.done = true;
+  });
+  updateKPIs(); renderTaskList(); saveLocal();
+});
+
+function refineTitle(t){
+  // small deterministic improvement: emphasize action verb and goal
+  const verbs = ['Design','Prototype','Test','Document','Publish','Review','Integrate','Calibrate','Simulate','Refactor'];
+  const v = verbs[(t.length + engine.seed.title.length) % verbs.length];
+  return t.replace(/^[^:]+:/,'').trim().replace(/^/,(v+': '));
+}
+
+/* --------------------- Beyond Plan -------------------- */
+$('#beyondPlan').addEventListener('click', ()=>{
+  if(!engine.year.tasks.length){ alert('Compile Year 1 first.'); return; }
+  const done = engine.year.tasks.filter(x=>x.done).length;
+  const t = engine.year.tasks.length;
+  const progress = t? Math.round(done/t*100):0;
+  const learned = summarizeLearnings();
+  const proposal = {
+    title: (engine.seed.title||'Mission') + ' — Beyond Plan',
+    recommendations: [
+      `Double-down on top skill: ${topSkill()}`,
+      `Address weakest tag: ${weakestTag()}`,
+      `Spin up 2 satellite projects aligned to “${(engine.seed.goals[0]||'Core Goal')}”`,
+      `Publish a Year 1 Scroll and open a bounty for peer replication`
+    ],
+    learned,
+    suggestedStart: nextDay(engine.config.startDate)
+  };
+  const blob = new Blob([JSON.stringify(proposal,null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='beyond-plan.json'; a.click();
+});
+
+function nextDay(iso){
+  const d = new Date(iso); d.setDate(d.getDate()+365); return d.toISOString().slice(0,10);
+}
+function summarizeLearnings(){
+  // Naive heuristic summary
+  const tagCounts = {};
+  engine.year.tasks.forEach(x=>x.tags.forEach(t=>{ tagCounts[t]=(tagCounts[t]||0)+1 }));
+  const popular = Object.entries(tagCounts).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>k+'('+v+')');
+  return {
+    progress: $('#kpiProgress').textContent,
+    coherence: $('#kpiCoherence').textContent,
+    popularTags: popular
+  };
+}
+function topSkill(){
+  const skillTags = engine.seed.skills.map(s=>'#'+s.replace(/\s+/g,''));
+  const counts = {}; engine.year.tasks.forEach(x=>x.tags.forEach(t=>{ if(skillTags.includes(t)) counts[t]=(counts[t]||0)+1 }));
+  const best = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  return best ? best[0] : 'general';
+}
+function weakestTag(){
+  const all = new Set(engine.year.tasks.flatMap(x=>x.tags));
+  const counts = {}; engine.year.tasks.forEach(x=>x.tags.forEach(t=>{ counts[t]=(counts[t]||0)+1 }));
+  let min=null, tag=null; all.forEach(t=>{ if(min===null || (counts[t]||0)<min){ min=(counts[t]||0); tag=t; } });
+  return tag || '#align';
+}
+
+/* ----------------------- Ledger ----------------------- */
+function renderLedger(){
+  const wrap = $('#ledgerList'); wrap.innerHTML='';
+  if(!engine.ledger.length){
+    const p = document.createElement('p'); p.className='muted small'; p.textContent='No entries yet.'; wrap.appendChild(p); return;
+  }
+  engine.ledger.forEach((e, i)=>{
+    const card = document.createElement('div'); card.className='card'; card.style.padding='10px';
+    const head = document.createElement('div'); head.innerHTML = `<b>${e.title}</b> · <span class="muted small">${new Date(e.ts).toLocaleString()}</span>`;
+    const meta = document.createElement('div'); meta.className='small muted';
+    meta.textContent = `Impact ${e.impact}/5 · Difficulty ${e.difficulty}/5 · X‑Pulse ${xpulse(e)} `;
+    const notes = document.createElement('div'); notes.className='small'; notes.textContent = e.notes||'';
+    card.appendChild(head); card.appendChild(meta); card.appendChild(notes);
+    wrap.appendChild(card);
+  });
+}
+function xpulse(e){
+  // toy scoring
+  return Math.round( (e.impact*1.3 + e.difficulty) * 10 );
+}
+$('#addLedger').addEventListener('click', ()=>{
+  const title = $('#ledTitle').value.trim();
+  const impact = parseInt($('#ledImpact').value||'3',10);
+  const difficulty = parseInt($('#ledDiff').value||'3',10);
+  const notes = $('#ledNotes').value.trim();
+  if(!title){ alert('Title required.'); return; }
+  engine.ledger.unshift({title, impact, difficulty, notes, ts: Date.now()});
+  $('#ledTitle').value=''; $('#ledNotes').value='';
+  renderLedger(); saveLocal();
+});
+$('#clearLedger').addEventListener('click', ()=>{
+  if(confirm('Clear all ledger entries?')){ engine.ledger = []; renderLedger(); saveLocal(); }
+});
+
+/* -------------------- Export / Import ------------------ */
+function exportJSON(filename, data){
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+}
+$('#exportJSON').addEventListener('click', ()=>exportJSON('sovereign-engine.json', engine));
+$('#exportCapsule').addEventListener('click', ()=>{
+  const capsule = {
+    version:1,
+    exportedAt: new Date().toISOString(),
+    engine
+  };
+  exportJSON('sovereign-time-capsule.json', capsule);
+});
+$('#exportLegacy').addEventListener('click', ()=>{
+  const legacy = {
+    version:1,
+    mission: engine.seed,
+    year: engine.year,
+    ledger: engine.ledger,
+    practices: ['breath','intent','micro-commit']
+  };
+  exportJSON('legacy-capsule.json', legacy);
+});
+$('#importFile').addEventListener('change', handleImport);
+$('#importLegacyBtn').addEventListener('click', ()=>$('#importLegacy').click());
+$('#importLegacy').addEventListener('change', handleImport);
+function handleImport(ev){
+  const file = ev.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const json = JSON.parse(reader.result);
+      if(json.engine){ engine = json.engine; } else { engine = json; }
+      renderAnchors(); updateKPIs(); drawMilestones(); renderTaskList(); renderLedger(); saveLocal();
+      alert('Imported successfully.');
+    }catch(e){ alert('Invalid JSON: '+e.message); }
+    ev.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+/* -------------------- Local Storage -------------------- */
+const KEY='sovereign-engine-v1';
+function saveLocal(){ try{ localStorage.setItem(KEY, JSON.stringify(engine)); }catch{} }
+function loadLocal(){
+  try{ const raw = localStorage.getItem(KEY); if(!raw) return;
+    const obj = JSON.parse(raw); if(obj && typeof obj==='object') engine = obj;
+  }catch{}
+}
+$('#saveLocal').addEventListener('click', saveLocal);
+$('#loadLocal').addEventListener('click', ()=>{ loadLocal(); renderAnchors(); updateKPIs(); drawMilestones(); renderTaskList(); renderLedger(); });
+
+$('#resetAll').addEventListener('click', ()=>{
+  if(!confirm('Reset everything?')) return;
+  engine = { seed:{title:'',goals:[],constraints:[],ethics:[],skills:[]},
+             config:{startDate:null,weeksPerQ:13, anchors: defaultAnchors},
+             year:{milestones:[], tasks:[], progress:{}}, ledger:[] };
+  renderAnchors(); updateKPIs(); drawMilestones(); renderTaskList(); renderLedger(); saveLocal();
+});
+
+/* ----------------------- Events ----------------------- */
+$('#compile').addEventListener('click', compileYear);
+document.addEventListener('DOMContentLoaded', ()=>{
+  loadLocal(); renderAnchors(); updateKPIs(); drawMilestones(); renderTaskList(); renderLedger();
+});
+
+</script>
+</body>
+</html>

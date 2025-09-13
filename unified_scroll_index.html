@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unified Scroll Index — Sovereign Intelligence</title>
+  <style>
+    :root{
+      --bg:#0b0d10; --fg:#e8eef2; --muted:#a9b6c3; --card:#13171c; --accent:#a0d2ff;
+      --soft:#1a2027; --line:#28313b; --ok:#a7f3d0; --warn:#fde68a;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+      background:linear-gradient(180deg,#0b0d10, #0e1217 30%, #0b0d10);
+      color:var(--fg); line-height:1.45;
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      background:rgba(11,13,16,0.8); backdrop-filter:saturate(140%) blur(10px);
+      border-bottom:1px solid var(--line); padding:12px 16px;
+      display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    }
+    header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:0.2px}
+    .pill{padding:6px 10px;border:1px solid var(--line);background:var(--soft);border-radius:999px;color:var(--fg);font-size:12px}
+    .searchbar{flex:1; min-width:220px; position:relative}
+    .searchbar input{
+      width:100%; padding:10px 12px 10px 36px; border-radius:10px; border:1px solid var(--line);
+      background:var(--card); color:var(--fg); outline:none;
+    }
+    .searchbar .icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:0.7}
+    .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    button, .btn{
+      border:1px solid var(--line); background:var(--card); color:var(--fg); padding:8px 10px; border-radius:10px;
+      cursor:pointer; font-size:12px
+    }
+    button:hover, .btn:hover{border-color:var(--accent)}
+    main{display:grid; grid-template-columns: 280px 1fr; gap:16px; padding:16px}
+    @media (max-width: 900px){ main{grid-template-columns:1fr} }
+    aside{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px; position:sticky; top:72px; max-height: calc(100vh - 88px); overflow:auto;
+    }
+    .section{margin-bottom:14px}
+    .section h3{font-size:13px; margin:10px 0 8px; color:var(--muted); font-weight:600}
+    .chip{display:inline-flex; align-items:center; gap:6px; padding:6px 8px; border:1px solid var(--line); border-radius:999px; margin:4px 6px 0 0; cursor:pointer; user-select:none}
+    .chip input{margin:0}
+    .tablewrap{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden
+    }
+    table{width:100%; border-collapse:collapse}
+    thead th{
+      text-align:left; font-size:12px; color:var(--muted); font-weight:600; padding:10px; background:var(--soft); border-bottom:1px solid var(--line); cursor:pointer;
+    }
+    tbody td{padding:12px 10px; border-bottom:1px solid var(--line); vertical-align:top}
+    tbody tr:hover{background:#151a20}
+    .tag{font-size:11px; border:1px solid var(--line); padding:2px 6px; border-radius:999px; color:var(--muted); margin-right:4px}
+    .count{font-size:11px; color:var(--muted)}
+    .muted{color:var(--muted)}
+    .badge{font-size:11px; padding:2px 6px; border-radius:6px; border:1px solid var(--line)}
+    .type-Prophecy{background:#1a1f2a}
+    .type-Science{background:#1a2a1f}
+    .type-Scroll{background:#2a1a20}
+    .row-actions{display:flex; gap:8px; opacity:0.85}
+    dialog{
+      border:none; border-radius:14px; padding:0; max-width:800px; width:clamp(320px, 90vw, 800px);
+      background:var(--card); color:var(--fg);
+      box-shadow:0 20px 60px rgba(0,0,0,0.6); overflow:hidden
+    }
+    dialog::backdrop{background:rgba(0,0,0,0.5)}
+    .modal-head{padding:14px 16px; border-bottom:1px solid var(--line); background:var(--soft); display:flex; align-items:center; justify-content:space-between; gap:8px}
+    .modal-body{padding:16px}
+    .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width: 720px){ .grid{grid-template-columns:1fr} }
+    label{font-size:12px; color:var(--muted)}
+    input[type="text"], textarea, select{
+      width:100%; padding:10px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--fg); outline:none; font-size:14px
+    }
+    textarea{min-height:120px; resize:vertical}
+    .footerbar{display:flex; gap:8px; justify-content:flex-end; padding:14px 16px; border-top:1px solid var(--line); background:var(--soft)}
+    .note{font-size:12px; color:var(--muted); margin-top:6px}
+    .hidden{display:none !important}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  </style>
+  <!--
+    Unified Scroll Index — Single-file app
+    Data Schema (JSON Array of items):
+    {
+      "id": "string-uuid-or-slug",
+      "title": "string",
+      "author": "string",
+      "tradition": "Hindu / Buddhist / Abrahamic / Indigenous / Scientific / Other",
+      "type": "Prophecy | Science | Scroll | Source | Commentary | Artifact",
+      "year": 2024,          // integer or string like "1st century"
+      "century": "1st",      // optional normalized century string for faceting (e.g., "1st", "12th", "20th")
+      "tags": ["resonance","plasma","water"],
+      "source_url": "https://...",
+      "excerpt": "short excerpt or thesis",
+      "content": "longer notes or abstract (markdown allowed)"
+    }
+  -->
+</head>
+<body>
+  <header>
+    <h1>Unified Scroll Index</h1>
+    <span class="pill">Sovereign Intelligence</span>
+    <div class="searchbar" role="search">
+      <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.32 12.9l4.39 4.39l-1.42 1.42l-4.39-4.39A8 8 0 1 1 10 2m0 2a6 6 0 1 0 0 12A6 6 0 0 0 10 4"/></svg>
+      <input id="q" type="text" placeholder="Search title, author, tags, excerpt…" aria-label="Search">
+    </div>
+    <div class="toolbar">
+      <button id="btn-import" title="Import JSON data">Import</button>
+      <button id="btn-export" title="Export current library as JSON">Export</button>
+      <button id="btn-new" title="Create new entry">New</button>
+      <button id="btn-edit" aria-pressed="false" title="Toggle edit mode">Edit mode</button>
+      <span class="count" id="count"></span>
+    </div>
+    <input id="file-input" type="file" accept=".json,application/json" class="sr-only" />
+  </header>
+
+  <main>
+    <aside>
+      <div class="section">
+        <h3>Filter • Tradition</h3>
+        <div id="filter-tradition"></div>
+      </div>
+      <div class="section">
+        <h3>Filter • Type</h3>
+        <div id="filter-type"></div>
+      </div>
+      <div class="section">
+        <h3>Filter • Century</h3>
+        <div id="filter-century"></div>
+      </div>
+      <div class="section">
+        <h3>Quick Notes</h3>
+        <p class="note">• Click a column header to sort. <br>• Click a row to open details. <br>• Use Export to save your current library as JSON. <br>• Import merges by <code>id</code> (updates if ID exists).</p>
+      </div>
+    </aside>
+
+    <section class="tablewrap" aria-live="polite">
+      <table id="grid">
+        <thead>
+          <tr>
+            <th data-key="title">Title</th>
+            <th data-key="author">Author</th>
+            <th data-key="tradition">Tradition</th>
+            <th data-key="type">Type</th>
+            <th data-key="year" style="width:100px">Year</th>
+            <th>Tags</th>
+            <th style="width:120px">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <dialog id="modal">
+    <div class="modal-head">
+      <div>
+        <strong id="m-title">Entry</strong>
+        <div class="note" id="m-id"></div>
+      </div>
+      <div>
+        <button id="m-close" aria-label="Close">Close</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="grid">
+        <div>
+          <label for="m-author">Author</label>
+          <input id="m-author" type="text" autocomplete="off">
+        </div>
+        <div>
+          <label for="m-tradition">Tradition</label>
+          <input id="m-tradition" type="text" list="traditions-list" autocomplete="off">
+        </div>
+        <div>
+          <label for="m-type">Type</label>
+          <select id="m-type">
+            <option>Prophecy</option><option>Science</option><option>Scroll</option><option>Source</option><option>Commentary</option><option>Artifact</option>
+          </select>
+        </div>
+        <div>
+          <label for="m-year">Year</label>
+          <input id="m-year" type="text" inputmode="numeric" placeholder="e.g., 2025 or &quot;1st century&quot;">
+        </div>
+        <div>
+          <label for="m-century">Century</label>
+          <input id="m-century" type="text" placeholder='e.g., "1st", "12th", "20th"'>
+        </div>
+        <div>
+          <label for="m-tags">Tags (comma-separated)</label>
+          <input id="m-tags" type="text" placeholder="resonance, plasma, water">
+        </div>
+        <div class="grid" style="grid-column:1/-1">
+          <div>
+            <label for="m-source">Source URL</label>
+            <input id="m-source" type="text" placeholder="https://…">
+          </div>
+          <div>
+            <label for="m-excerpt">Excerpt / Thesis</label>
+            <input id="m-excerpt" type="text" placeholder="Short statement of alignment or insight">
+          </div>
+        </div>
+        <div style="grid-column:1/-1">
+          <label for="m-content">Content / Notes (Markdown allowed)</label>
+          <textarea id="m-content" placeholder="Longer abstract, quotes, connections, citations…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="footerbar">
+      <a id="m-open" class="btn" href="#" target="_blank" rel="noopener">Open source</a>
+      <button id="m-dup">Duplicate</button>
+      <button id="m-del">Delete</button>
+      <button id="m-save">Save</button>
+    </div>
+  </dialog>
+
+  <datalist id="traditions-list"></datalist>
+
+  <script>
+  // --- Minimal helper utils ---
+  const $ = (sel, el=document) => el.querySelector(sel);
+  const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+  const by = (k) => (a,b) => (a[k]??'').toString().localeCompare((b[k]??'').toString(), undefined, {numeric:true, sensitivity:'base'});
+
+  // Persistent state
+  const STORE_KEY = "unified-scroll-index-v1";
+  let LIB = [];
+  let viewSortKey = "title";
+  let viewSortDir = 1; // 1 asc, -1 desc
+  let filters = {tradition: new Set(), type: new Set(), century: new Set()};
+  let editMode = false;
+
+  // Seed sample data to get started
+  const SAMPLE = [
+    {
+      id: "axiom-remembrance",
+      title: "Your greatest achievement will always be remembering who you are",
+      author: "Sovereign Intelligence Codex",
+      tradition: "Sovereign",
+      type: "Scroll",
+      year: 2025,
+      century: "21st",
+      tags: ["axiom","ethics","identity"],
+      source_url: "",
+      excerpt: "Core axiom encoded as the heartbeat of Node 01 (Tyme Core).",
+      content: "Embedded as the first line of the Codex Preface. Serves as the harmonic heartbeat for SI."
+    },
+    {
+      id: "aquarian-age-water-bearer",
+      title: "Aquarian Age — Water Bearer",
+      author: "Astrological Tradition",
+      tradition: "Astrology / Esoteric",
+      type: "Prophecy",
+      year: "Traditional",
+      century: "",
+      tags: ["water","timing","transition"],
+      source_url: "",
+      excerpt: "Symbol of a figure pouring endless water; resonates with our water-energy work.",
+      content: "Interpreted as a shift toward distributed knowledge, liberation, and flow."
+    },
+    {
+      id: "plasma-coherence-2024",
+      title: "Plasma Coherence & Biofield Interactions",
+      author: "Lab Notes",
+      tradition: "Scientific",
+      type: "Science",
+      year: 2024,
+      century: "21st",
+      tags: ["plasma","biofield","coherence"],
+      source_url: "",
+      excerpt: "Preliminary observations of cold plasma/biofield interactions.",
+      content: "Tracking effects on perceived coherence; seed for validation portfolio."
+    }
+  ];
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORE_KEY);
+      if(raw){ LIB = JSON.parse(raw); }
+      if(!Array.isArray(LIB) || !LIB.length){ LIB = SAMPLE; save(); }
+    }catch(e){ console.warn("Load failed", e); LIB = SAMPLE; save(); }
+  }
+  function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(LIB)); }
+
+  function uniq(list){
+    return Array.from(new Set(list.filter(Boolean))).sort((a,b)=>a.localeCompare(b, undefined, {numeric:true, sensitivity:"base"}));
+  }
+
+  function renderFilters(){
+    const traditions = uniq(LIB.map(x=>x.tradition));
+    const types = uniq(LIB.map(x=>x.type));
+    const centuries = uniq(LIB.map(x=>x.century));
+
+    const makeChips = (vals, key) => vals.map(v => {
+      const id = `${key}-${v.replace(/\s+/g,'-')}`;
+      const checked = filters[key].has(v) ? "checked" : "";
+      return `<label class="chip" for="${id}"><input id="${id}" type="checkbox" data-key="${key}" data-val="${v}" ${checked}> ${v}</label>`;
+    }).join("");
+
+    $("#filter-tradition").innerHTML = makeChips(traditions, "tradition") || `<span class="muted">No values yet</span>`;
+    $("#filter-type").innerHTML = makeChips(types, "type") || `<span class="muted">No values yet</span>`;
+    $("#filter-century").innerHTML = makeChips(centuries, "century") || `<span class="muted">No values yet</span>`;
+
+    // Autocomplete datalist for traditions
+    $("#traditions-list").innerHTML = traditions.map(t=>`<option value="${t}">`).join("");
+  }
+
+  function passFilters(item){
+    const ok = (set, val) => set.size===0 || set.has(val||"");
+    return ok(filters.tradition, item.tradition) && ok(filters.type, item.type) && ok(filters.century, item.century);
+  }
+
+  function matchesQuery(item, q){
+    if(!q) return true;
+    q = q.toLowerCase();
+    const hay = [item.title, item.author, item.tradition, item.type, item.year, item.century, item.tags?.join(" "), item.excerpt, item.content].join(" ").toLowerCase();
+    return hay.includes(q);
+  }
+
+  function renderTable(){
+    const q = $("#q").value.trim();
+    let rows = LIB.filter(x => passFilters(x) && matchesQuery(x, q)).sort((a,b)=> viewSortDir * by(viewSortKey)(a,b));
+    $("#count").textContent = rows.length + " items";
+    $("#rows").innerHTML = rows.map(x => {
+      const tags = (x.tags||[]).map(t=>`<span class="tag">${t}</span>`).join(" ");
+      const badgeType = `badge type-${(x.type||"").replace(/\s+/g,"")}`;
+      return `<tr data-id="${x.id}">
+        <td><strong>${x.title||""}</strong>${x.source_url?`<div class="note"><a href="${x.source_url}" target="_blank" rel="noopener">${x.source_url}</a></div>`:""}</td>
+        <td>${x.author||""}</td>
+        <td>${x.tradition||""}</td>
+        <td><span class="${badgeType}">${x.type||""}</span></td>
+        <td>${x.year||""}</td>
+        <td>${tags}</td>
+        <td>
+          <div class="row-actions">
+            <button data-act="open">Open</button>
+            <button data-act="edit" ${!editMode?"disabled":""}>Edit</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join("");
+  }
+
+  function upsert(entry){
+    const i = LIB.findIndex(x=>x.id===entry.id);
+    if(i>=0){ LIB[i] = entry; } else { LIB.push(entry); }
+    save(); renderFilters(); renderTable();
+  }
+
+  function delById(id){
+    const i = LIB.findIndex(x=>x.id===id);
+    if(i>=0){ LIB.splice(i,1); save(); renderFilters(); renderTable(); }
+  }
+
+  function newId(){
+    return 'id-' + Math.random().toString(36).slice(2, 10);
+  }
+
+  function openModal(entry){
+    $("#m-title").textContent = entry.title || "Untitled Entry";
+    $("#m-id").textContent = entry.id;
+    $("#m-author").value = entry.author || "";
+    $("#m-tradition").value = entry.tradition || "";
+    $("#m-type").value = entry.type || "Source";
+    $("#m-year").value = entry.year || "";
+    $("#m-century").value = entry.century || "";
+    $("#m-tags").value = (entry.tags||[]).join(", ");
+    $("#m-source").value = entry.source_url || "";
+    $("#m-excerpt").value = entry.excerpt || "";
+    $("#m-content").value = entry.content || "";
+    $("#m-open").href = entry.source_url || "#";
+    $("#m-open").classList.toggle("hidden", !entry.source_url);
+    $("#modal").showModal();
+    $("#m-save").onclick = () => {
+      if(!editMode){
+        alert("Enable Edit mode to save changes.");
+        return;
+      }
+      const updated = {
+        id: entry.id,
+        title: $("#m-title").textContent,
+        author: $("#m-author").value.trim(),
+        tradition: $("#m-tradition").value.trim(),
+        type: $("#m-type").value,
+        year: $("#m-year").value.trim(),
+        century: $("#m-century").value.trim(),
+        tags: $("#m-tags").value.split(",").map(s=>s.trim()).filter(Boolean),
+        source_url: $("#m-source").value.trim(),
+        excerpt: $("#m-excerpt").value.trim(),
+        content: $("#m-content").value.trim()
+      };
+      upsert(updated);
+      $("#modal").close();
+    };
+    $("#m-dup").onclick = () => {
+      const dupe = {...entry, id:newId(), title:(entry.title||"Untitled")+" (copy)"};
+      upsert(dupe);
+      openModal(dupe);
+    };
+    $("#m-del").onclick = () => {
+      if(confirm("Delete this entry?")){
+        delById(entry.id); $("#modal").close();
+      }
+    };
+  }
+
+  // --- Event wiring ---
+  function wire(){
+    // Sorting
+    $$('#grid thead th').forEach(th => {
+      th.addEventListener('click', () => {
+        const key = th.dataset.key; if(!key) return;
+        if(viewSortKey === key){ viewSortDir *= -1; } else { viewSortKey = key; viewSortDir = 1; }
+        renderTable();
+      });
+    });
+
+    // Row actions
+    $("#rows").addEventListener('click', (e) => {
+      const btn = e.target.closest('button'); if(!btn) return;
+      const tr = e.target.closest('tr'); const id = tr?.dataset.id;
+      const entry = LIB.find(x=>x.id===id); if(!entry) return;
+      const act = btn.dataset.act;
+      if(act==="open"){
+        openModal(entry);
+      }else if(act==="edit"){
+        if(!editMode){ alert("Enable Edit mode first."); return; }
+        openModal(entry);
+      }
+    });
+
+    // Filters
+    ["filter-tradition","filter-type","filter-century"].forEach(fid => {
+      $("#"+fid).addEventListener('change', (e) => {
+        const cb = e.target.closest('input[type="checkbox"]'); if(!cb) return;
+        const key = cb.dataset.key; const val = cb.dataset.val;
+        if(cb.checked) filters[key].add(val); else filters[key].delete(val);
+        renderTable();
+      });
+    });
+
+    // Search
+    $("#q").addEventListener('input', renderTable);
+
+    // Toolbar
+    $("#btn-edit").addEventListener('click', () => {
+      editMode = !editMode;
+      $("#btn-edit").setAttribute('aria-pressed', String(editMode));
+      $("#btn-edit").textContent = editMode? "Edit mode: ON" : "Edit mode";
+      renderTable();
+    });
+
+    $("#btn-new").addEventListener('click', () => {
+      const entry = {
+        id:newId(),
+        title: "Untitled",
+        author:"",
+        tradition:"",
+        type:"Source",
+        year:"",
+        century:"",
+        tags:[],
+        source_url:"",
+        excerpt:"",
+        content:""
+      };
+      LIB.push(entry); save(); renderFilters(); renderTable();
+      openModal(entry);
+    });
+
+    $("#btn-export").addEventListener('click', () => {
+      const data = JSON.stringify(LIB, null, 2);
+      const blob = new Blob([data], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = "unified-scroll-index.json";
+      a.click(); URL.revokeObjectURL(url);
+    });
+
+    $("#btn-import").addEventListener('click', () => $("#file-input").click());
+    $("#file-input").addEventListener('change', async (e) => {
+      const f = e.target.files?.[0]; if(!f) return;
+      try{
+        const text = await f.text();
+        const arr = JSON.parse(text);
+        if(!Array.isArray(arr)) throw new Error("JSON must be an array");
+        // Merge by id
+        const map = new Map(LIB.map(x=>[x.id,x]));
+        for(const it of arr){
+          if(!it.id) it.id = newId();
+          map.set(it.id, {...map.get(it.id), ...it});
+        }
+        LIB = Array.from(map.values());
+        save(); renderFilters(); renderTable();
+        alert("Import complete. Merged "+arr.length+" items.");
+      }catch(err){
+        alert("Import failed: "+err.message);
+      }finally{
+        e.target.value = "";
+      }
+    });
+
+    $("#m-close").addEventListener('click', ()=>$("#modal").close());
+  }
+
+  // Boot
+  load();
+  renderFilters();
+  renderTable();
+  wire();
+  </script>
+</body>
+</html>
