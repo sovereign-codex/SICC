@@ -1,0 +1,35 @@
+name: 🌬️ SICC Breath Cycle
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 */6 * * *'  # every 6 hours
+
+jobs:
+  breathe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Determine cycle
+        id: cycle
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "cycle=inhale" >> "$GITHUB_OUTPUT"
+          else
+            echo "cycle=pulse" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Trigger Dream Console breath
+        env:
+          DREAM_CONSOLE_URL: https://dream-console-shepherdjhagan.replit.app/breath
+        run: |
+          PAYLOAD=$(jq -n \
+            --arg cycle "${{ steps.cycle.outputs.cycle }}" \
+            --arg source "SICC-gh-action" \
+            --arg timestamp "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+            --arg commit "${{ github.sha }}" \
+            '{cycle: $cycle, source: $source, timestamp: $timestamp, commit: $commit}')
+          echo "Sending payload: $PAYLOAD"
+          curl -s -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$DREAM_CONSOLE_URL"
