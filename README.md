@@ -37,8 +37,9 @@ This repository unites prototypes, scrolls, and experimental modules into one br
 1. Push this repository to GitHub.  
 2. Enable **GitHub Pages** under repo settings.  
 3. Set the branch to `main` and the root folder.  
-4. Your SICC homepage will be live at:  
-   https://sovereign-codex.github.io/SICC/
+4. Your SICC homepage will be live at:
+  
+https://sovereign-codex.github.io/SICC/
 
 ### Replit (Optional)
 - Import this repo into Replit for live experimentation.  
